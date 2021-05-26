@@ -1,0 +1,248 @@
+MainActivity.java
+
+package com.example.android.scorekeeper;
+
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
+public class MainActivity extends AppCompatActivity {
+    private int mScore1;
+    private int mScore2;
+    private TextView mScoreText1;
+    private TextView mScoreText2;
+    private final String SCORE1_KEY = "score1";
+    private final String SCORE2_KEY = "score2";
+    private SharedPreferences mPreferences;
+    private String sharedPrefFile = "com.example.android.scorekeeper";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        mScoreText1 = findViewById(R.id.score_1);
+        mScoreText2 = findViewById(R.id.score_2);
+        mPreferences = getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+        mScore1 = mPreferences.getInt(SCORE1_KEY, 0);
+        mScoreText1.setText(String.valueOf(mScore1));
+        mScore2 = mPreferences.getInt(SCORE2_KEY, 0);
+        mScoreText2.setText(String.valueOf(mScore2));
+    }
+
+    /**
+     * Handles the onClick of both the decrement buttons.
+     *
+     * @param view The button view that was clicked
+     */
+    public void decreaseScore(View view) {
+        int viewID = view.getId();
+        switch (viewID) {
+            case R.id.decreaseTeam1:
+                mScore1--;
+                mScoreText1.setText(String.valueOf(mScore1));
+                break;
+            case R.id.decreaseTeam2:
+                mScore2--;
+                mScoreText2.setText(String.valueOf(mScore2));
+        }
+    }
+
+    /**
+     * Handles the onClick of both the increment buttons.
+     *
+     * @param view The button view that was clicked
+     */
+    public void increaseScore(View view) {
+        int viewID = view.getId();
+        switch (viewID) {
+            case R.id.increaseTeam1:
+                mScore1++;
+                mScoreText1.setText(String.valueOf(mScore1));
+                break;
+            case R.id.increaseTeam2:
+                mScore2++;
+                mScoreText2.setText(String.valueOf(mScore2));
+        }
+    }
+
+    /**
+     * Creates the night mode menu option.
+     *
+     * @param menu The menu in the action bar
+     * @return True to display the menu, false to hide it
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        int nightMode = AppCompatDelegate.getDefaultNightMode();
+        if(nightMode == AppCompatDelegate.MODE_NIGHT_YES){
+            menu.findItem(R.id.night_mode).setTitle(R.string.day_mode);
+        } else{
+            menu.findItem(R.id.night_mode).setTitle(R.string.night_mode);
+        }
+        return true;
+    }
+
+
+    /**
+     * Handles options menu item clicks.
+     *
+     * @param item The item that was pressed
+     * @return returns true since the item click wa handled
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Check if the correct item was clicked.
+        if (item.getItemId() == R.id.night_mode) {
+            // Get the night mode state of the app.
+            int nightMode = AppCompatDelegate.getDefaultNightMode();
+            // Set the theme mode for the restarted activity.
+            if (nightMode == AppCompatDelegate.MODE_NIGHT_YES) {
+                AppCompatDelegate.setDefaultNightMode
+                        (AppCompatDelegate.MODE_NIGHT_NO);
+            } else {
+                AppCompatDelegate.setDefaultNightMode
+                        (AppCompatDelegate.MODE_NIGHT_YES);
+            }
+            // Recreate the activity for the theme change to take effect.
+            recreate();
+        }
+        return true;
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+        preferencesEditor.putInt(SCORE1_KEY, mScore1);
+        preferencesEditor.putInt(SCORE2_KEY, mScore2);
+        preferencesEditor.apply();
+    }
+
+    public void reset(View view) {
+        mScore1 = mScore2 = 0;
+        mScoreText1.setText(String.valueOf(mScore1));
+        mScoreText2.setText(String.valueOf(mScore2));
+        SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+        preferencesEditor.clear();
+        preferencesEditor.apply();
+    }
+}
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+activity_main.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    tools:context="com.example.android.scorekeeper.MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/team_1"
+            style="@style/TeamText" />
+
+        <ImageButton
+            android:id="@+id/decreaseTeam1"
+            android:layout_width="@dimen/button_size"
+            android:layout_height="@dimen/button_size"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            style="@style/MinusButtons"
+            android:onClick="decreaseScore"/>
+
+        <TextView
+            android:id="@+id/score_1"
+            style="@style/ScoreText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/initial_count"
+            android:textSize="56sp" />
+
+        <ImageButton
+            android:id="@+id/increaseTeam1"
+            android:layout_width="@dimen/button_size"
+            android:layout_height="@dimen/button_size"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            style="@style/PlusButtons"
+            android:onClick="increaseScore"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            style="@style/TeamText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/team_2" />
+
+        <ImageButton
+            android:id="@+id/decreaseTeam2"
+            android:layout_width="@dimen/button_size"
+            android:layout_height="@dimen/button_size"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            style="@style/MinusButtons"
+            android:onClick="decreaseScore"/>
+
+        <TextView
+            android:id="@+id/score_2"
+            style="@style/ScoreText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/initial_count"
+            android:textSize="56sp" />
+
+        <ImageButton
+            android:id="@+id/increaseTeam2"
+            android:layout_width="@dimen/button_size"
+            android:layout_height="@dimen/button_size"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            style="@style/PlusButtons"
+            android:onClick="increaseScore"/>
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/button_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:onClick="reset"
+        android:text="@string/reset" />
+</LinearLayout>
+
+横屏时对字体大小进行了微调
